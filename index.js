@@ -15,7 +15,7 @@ const io = new Server(server,{
     }
 })
 
-const activeUsers = []
+let activeUsers = []
 io.on("connection",(socket)=>{
      
      socket.on("new_user_add",(usr)=>{
@@ -27,10 +27,11 @@ io.on("connection",(socket)=>{
           else{
             const idx = activeUsers.findIndex(u=>u.userId===usr.userId);
             activeUsers[idx] = {...activeUsers[idx],socketId:socket.id};
-           
+            
           }
-          // send all active users to new user
-          io.emit("get-users", activeUsers);
+          
+          const user = {...usr,socketId:socket.id}
+          io.emit("get-users", {activeUsers,connectedUser:{...user}});
           
      })
 
@@ -49,7 +50,13 @@ io.on("connection",(socket)=>{
 //    socket.on("onDisconnect")
     
     socket.on("disconnect",()=>{
-        console.log("User disconnected: "+socket.id)
+        const disconnectedUser= activeUsers.find((user) => user.socketId === socket.id);
+        activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
+        
+        console.log("User Disconnected", disconnectedUser);
+    // send all active users to all users
+    const data = {activeUsers,disconnectedUser}
+        io.emit("get-users", data);
      })
     
 })
