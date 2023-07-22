@@ -43,14 +43,29 @@ io.on("connection", (socket) => {
   socket.on("join_group", (data) => {
     const group = data.activeGroup;
     socket.join(group.groupId);
-    console.log("Group Joined", data);
+    // console.log("Group Joined", data);
   });
   //? socket code for group chat
   socket.on("send_group_message", (data) => {
-    console.log("Group Message Send", data);
+    // console.log("Group Message Send", data);
     socket.to(data.groupId).emit("receive_group_message", data);
     //! write socket code for emitting receive group chat to frontend
   });
+
+  socket.on("send_groupchat_notification",(data)=>{
+    const groupMembers = data.groupMembers;
+    // console.log("Group Notification Send", data);
+    const onlineUsers = activeUsers.filter(user=>{
+      if(groupMembers?.some(member=>member.userId===user.userId)){
+        return user;
+      }
+    })
+    console.log(onlineUsers)
+    onlineUsers.forEach(user=>{
+      socket.to(user.socketId).emit("receive_groupchat_notification",data)
+    });
+    
+  })
 
   socket.on("send_message", (data) => {
     const { userId } = data;
@@ -60,6 +75,20 @@ io.on("connection", (socket) => {
       io.to(user.socketId).emit("recieve_message", data);
     }
   });
+
+  socket.on("group_add",(groupInfo)=>{
+    console.log("Group added", groupInfo)
+    const groupMembers = groupInfo.groupMembers;
+    const onlineUsers = activeUsers.filter(user=>{
+      if(groupMembers?.some(member=>member.userId===user.userId)){
+        return user;
+      }
+    })
+    onlineUsers.forEach(user=>{
+      socket.to(user.socketId).emit("group_add_notification",groupInfo)
+    });
+    //socket.emit("receive_group_add_notification",)
+  })
 
   socket.on("disconnect", () => {
     const disconnectedUser = activeUsers.find(
