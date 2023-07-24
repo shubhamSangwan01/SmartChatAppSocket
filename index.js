@@ -10,7 +10,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "https://smartchatappserver-production.up.railway.app/",
     methods: ["GET", "POST"],
   },
 });
@@ -102,7 +102,7 @@ io.on("connection", (socket) => {
     io.emit("get-users", data);
   });
 });
-
-server.listen(4000, () => {
-  console.log("Server running at port " + 4000);
+const PORT = process.env.PORT || 4000
+server.listen(PORT, () => {
+  console.log("Server running at port " + PORT);
 });
