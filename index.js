@@ -10,7 +10,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://smartchatappserver-production.up.railway.app/",
+    origin: "https://main--bright-macaron-9e9881.netlify.app/",
     methods: ["GET", "POST"],
   },
 });
